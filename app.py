@@ -133,23 +133,31 @@ def index():
     day_new = np.arange(1, 101)  # testdata 100indexes
     day_pred = np.arange(101, 104)  # 101-131-predicted
 
+    print("DAYNEW")
+    print(day_new.tolist())
+    # arr = day_new.tolist()
+    # print(type(arr))
+
     # Serialization
-    numpyData1 = day_new
-    encodedNumpyData1 = json.dumps(numpyData1, cls=NumpyArrayEncoder)  # use dump() to write array into file
+    # numpyData1 = day_new
+    # encodedNumpyData1 = json.dumps(numpyData1, cls=NumpyArrayEncoder)  # use dump() to write array into file
     # print("Printing JSON serialized NumPy array")
     # print(encodedNumpyData1)
-
-    numpyData2 = day_pred
-    encodedNumpyData2 = json.dumps(numpyData2, cls=NumpyArrayEncoder)  # use dump() to write array into file
-
+    # print(type(encodedNumpyData1))
+    #
+    # numpyData2 = day_pred
+    # encodedNumpyData2 = json.dumps(numpyData2, cls=NumpyArrayEncoder)  # use dump() to write array into file
+    #
     numpyData3 = scaler.inverse_transform(df1[1131:])
-    encodedNumpyData3 = json.dumps(numpyData3, cls=NumpyArrayEncoder)  # use dump() to write array into file
-
+    # encodedNumpyData3 = json.dumps(numpyData3, cls=NumpyArrayEncoder)  # use dump() to write array into file
+    #
     numpyData4 = scaler.inverse_transform(lst_output)
-    encodedNumpyData4 = json.dumps(numpyData4, cls=NumpyArrayEncoder)  # use dump() to write array into file
-
-    daynew = {"x": encodedNumpyData1, "y": encodedNumpyData2}
-    daypred = {"x": encodedNumpyData3, "y": encodedNumpyData4}
+    # encodedNumpyData4 = json.dumps(numpyData4, cls=NumpyArrayEncoder)  # use dump() to write array into file
+    #
+    # daynew = {"x": encodedNumpyData1, "y": encodedNumpyData2}
+    # daypred = {"x": encodedNumpyData3, "y": encodedNumpyData4}
+    daynew = {"x": day_new.tolist(), "y": day_pred.tolist()}
+    daypred = {"x": numpyData3.tolist(), "y": numpyData4.tolist()}
 
     data = []
     data.append(daynew)
