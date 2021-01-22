@@ -1,4 +1,5 @@
 from flask import  Flask, render_template, request
+from flask_cors import CORS
 import os
 import numpy as np
 import pandas_datareader as pdr
@@ -12,6 +13,7 @@ import json
 from json import JSONEncoder
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def index():
