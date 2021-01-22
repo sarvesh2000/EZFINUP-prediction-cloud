@@ -1,5 +1,4 @@
 from flask import  Flask, render_template, request
-from flask_cors import CORS
 import os
 import numpy as np
 import pandas_datareader as pdr
@@ -13,7 +12,6 @@ import json
 from json import JSONEncoder
 
 app = Flask(__name__)
-CORS(app)
 
 @app.route('/')
 def index():
@@ -154,11 +152,6 @@ def index():
     print(final_data)
     return final_data
 
-    @app.after_request
-    def after_request(response):
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        return response
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=False)
