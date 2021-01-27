@@ -1,35 +1,22 @@
 from flask import  Flask, render_template, request
-from flask_cors import CORS
-import os
-import numpy as np
+# from flask_cors import CORS
 import pandas_datareader as pdr
-import pandas as pd
-import matplotlib.pyplot as plt
-# import plotly.express as px
 from sklearn.preprocessing import MinMaxScaler
 from newsapi import NewsApiClient
 
-import json
-from json import JSONEncoder
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    return response
+# @app.after_request
+# def after_request(response):
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+#     return response
 
 @app.route('/')
 def index():
     import numpy as np
-
-    class NumpyArrayEncoder(JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            return JSONEncoder.default(self, obj)
 
     df = pdr.get_data_yahoo(request.args.get('stockname'))
     df1 = df.reset_index()['Close']
@@ -68,14 +55,27 @@ def index():
 
     model = tf.keras.Sequential([keras.layers.Dense(units=1, input_shape=[1])])
     model = Sequential()
-    model.add(LSTM(50, return_sequences=True, input_shape=(100, 1)))
-    model.add(LSTM(50, return_sequences=True))
+    if request.args.get('stockname') =='IDEA.NS':
+        model.add(LSTM(50, return_sequences=True, input_shape=(100, 1)))
+        model.add(LSTM(50, return_sequences=True))
+    else:
+        model.add(LSTM(50, return_sequences=True, input_shape=(100, 1)))
+        model.add(LSTM(50, return_sequences=True))
+        model.add(LSTM(50, return_sequences=True))
+        model.add(LSTM(50, return_sequences=True))
+
     model.add(LSTM(50))
 
     model.add(Dense(1))
-    model.compile(loss='mean_squared_error', optimizer='adam')
+    if request.args.get('stockname') =='IDEA.NS':
+        model.compile(loss='mean_squared_error', optimizer='adam')
+    else:
+        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
-    model.fit(X_train, y_train, validation_data=(X_test, ytest), epochs=10, batch_size=64, verbose=1)
+    if request.args.get('stockname') =='IDEA.NS':
+        model.fit(X_train, y_train, validation_data=(X_test, ytest), epochs=10, batch_size=64, verbose=1)
+    else:
+        model.fit(X_train, y_train, validation_data=(X_test, ytest), epochs=50, batch_size=10, verbose=2)
 
     train_predict = model.predict(X_train)
     test_predict = model.predict(X_test)
@@ -106,56 +106,63 @@ def index():
     lst_output = []
     n_steps = 100
     i = 0
-    while (i < 3):
+    if request.args.get('stockname') =='IDEA.NS':
+        while (i < 3):
 
-        if (len(temp_input) > 100):
+            if (len(temp_input) > 100):
 
-            x_input = np.array(temp_input[1:])
+                x_input = np.array(temp_input[1:])
 
-            x_input = x_input.reshape(1, -1)
-            x_input = x_input.reshape((1, n_steps, 1))
+                x_input = x_input.reshape(1, -1)
+                x_input = x_input.reshape((1, n_steps, 1))
 
-            yhat = model.predict(x_input, verbose=0)
-            temp_input.extend(yhat[0].tolist())
-            temp_input = temp_input[1:]
+                yhat = model.predict(x_input, verbose=0)
+                temp_input.extend(yhat[0].tolist())
+                temp_input = temp_input[1:]
 
-            lst_output.extend(yhat.tolist())
-            i = i + 1
-        else:
-            x_input = x_input.reshape((1, n_steps, 1))
-            yhat = model.predict(x_input, verbose=0)
+                lst_output.extend(yhat.tolist())
+                i = i + 1
+            else:
+                x_input = x_input.reshape((1, n_steps, 1))
+                yhat = model.predict(x_input, verbose=0)
 
-            temp_input.extend(yhat[0].tolist())
+                temp_input.extend(yhat[0].tolist())
 
-            lst_output.extend(yhat.tolist())
-            i = i + 1
+                lst_output.extend(yhat.tolist())
+                i = i + 1
+    else:
+        while (i < 10):
 
-    day_new = np.arange(1, 101)  # testdata 100indexes
-    day_pred = np.arange(101, 104)  # 101-131-predicted
+            if (len(temp_input) > 100):
+                # print(temp_input)
+                x_input = np.array(temp_input[1:])
+                x_input = x_input.reshape(1, -1)
+                x_input = x_input.reshape((1, n_steps, 1))
+                # print(x_input)
+                yhat = model.predict(x_input, verbose=0)
 
-    print("DAYNEW")
-    print(day_new.tolist())
-    # arr = day_new.tolist()
-    # print(type(arr))
+                temp_input.extend(yhat[0].tolist())
+                temp_input = temp_input[1:]
+                # print(temp_input)
+                lst_output.extend(yhat.tolist())
+                i = i + 1
+            else:
+                x_input = x_input.reshape((1, n_steps, 1))
+                yhat = model.predict(x_input, verbose=0)
 
-    # Serialization
-    # numpyData1 = day_new
-    # encodedNumpyData1 = json.dumps(numpyData1, cls=NumpyArrayEncoder)  # use dump() to write array into file
-    # print("Printing JSON serialized NumPy array")
-    # print(encodedNumpyData1)
-    # print(type(encodedNumpyData1))
-    #
-    # numpyData2 = day_pred
-    # encodedNumpyData2 = json.dumps(numpyData2, cls=NumpyArrayEncoder)  # use dump() to write array into file
-    #
+                temp_input.extend(yhat[0].tolist())
+
+                lst_output.extend(yhat.tolist())
+                i = i + 1
+    if request.args.get('stockname') =='IDEA.NS':
+        day_new = np.arange(1, 101)  # testdata 100indexes
+        day_pred = np.arange(101, 104)  # 101-131-predicted
+    else:
+        day_new = np.arange(1, 101)  # testdata 100indexes
+        day_pred = np.arange(101, 111)  # 101-131-predicted
+
     numpyData3 = scaler.inverse_transform(df1[1131:])
-    # encodedNumpyData3 = json.dumps(numpyData3, cls=NumpyArrayEncoder)  # use dump() to write array into file
-    #
     numpyData4 = scaler.inverse_transform(lst_output)
-    # encodedNumpyData4 = json.dumps(numpyData4, cls=NumpyArrayEncoder)  # use dump() to write array into file
-    #
-    # daynew = {"x": encodedNumpyData1, "y": encodedNumpyData2}
-    # daypred = {"x": encodedNumpyData3, "y": encodedNumpyData4}
     daynew = {"x": day_new.tolist(), "y": day_pred.tolist()}
     daypred = {"x": numpyData3.tolist(), "y": numpyData4.tolist()}
 
