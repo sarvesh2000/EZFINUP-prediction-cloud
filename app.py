@@ -6,13 +6,6 @@ from newsapi import NewsApiClient
 
 
 app = Flask(__name__)
-# CORS(app)
-
-# @app.after_request
-# def after_request(response):
-#     response.headers.add('Access-Control-Allow-Origin', '*')
-#     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-#     return response
 
 @app.route('/')
 def index():
@@ -55,7 +48,7 @@ def index():
 
     model = tf.keras.Sequential([keras.layers.Dense(units=1, input_shape=[1])])
     model = Sequential()
-    if request.args.get('stockname') =='IDEA.NS':
+    if (request.args.get('stockname') =='IDEA.NS') or (request.args.get('stockname') =='AAPL') or (request.args.get('stockname') =='TSLA'):
         model.add(LSTM(50, return_sequences=True, input_shape=(100, 1)))
         model.add(LSTM(50, return_sequences=True))
     else:
@@ -67,15 +60,15 @@ def index():
     model.add(LSTM(50))
 
     model.add(Dense(1))
-    if request.args.get('stockname') =='IDEA.NS':
+    if (request.args.get('stockname') =='IDEA.NS') or (request.args.get('stockname') =='AAPL') or (request.args.get('stockname') =='TSLA'):
         model.compile(loss='mean_squared_error', optimizer='adam')
     else:
         model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
-    if request.args.get('stockname') =='IDEA.NS':
+    if (request.args.get('stockname') =='IDEA.NS') or (request.args.get('stockname') =='AAPL') or (request.args.get('stockname') =='TSLA'):
         model.fit(X_train, y_train, validation_data=(X_test, ytest), epochs=10, batch_size=64, verbose=1)
     else:
-        model.fit(X_train, y_train, validation_data=(X_test, ytest), epochs=50, batch_size=10, verbose=2)
+        model.fit(X_train, y_train, validation_data=(X_test, ytest), epochs=10, batch_size=10, verbose=2)  # Actual Epoch 50. Changing to 10 for current demo
 
     train_predict = model.predict(X_train)
     test_predict = model.predict(X_test)
@@ -94,8 +87,13 @@ def index():
     testPredictPlot = np.empty_like(df1)
     testPredictPlot[:, :] = np.nan
     testPredictPlot[len(train_predict) + (look_back * 2) + 1:len(df1) - 1, :] = test_predict
-
-    x_input = test_data[331:].reshape(1, -1)
+    
+    if request.args.get('stockname') =='AAPL':
+         x_input = test_data[341:].reshape(1,-1)
+    elif request.args.get('stockname') == 'TSLA':
+        x_input = test_data[341:].reshape(1,-1)
+    else:
+        x_input = test_data[331:].reshape(1, -1)
 
     temp_input = list(x_input)
     temp_input = temp_input[0].tolist()
@@ -106,7 +104,7 @@ def index():
     lst_output = []
     n_steps = 100
     i = 0
-    if request.args.get('stockname') =='IDEA.NS':
+    if (request.args.get('stockname') =='IDEA.NS') or (request.args.get('stockname') =='AAPL') or (request.args.get('stockname') =='TSLA'):
         while (i < 3):
 
             if (len(temp_input) > 100):
@@ -154,14 +152,26 @@ def index():
 
                 lst_output.extend(yhat.tolist())
                 i = i + 1
-    if request.args.get('stockname') =='IDEA.NS':
+    if (request.args.get('stockname') =='IDEA.NS') or (request.args.get('stockname') =='AAPL') or (request.args.get('stockname') =='TSLA'):
         day_new = np.arange(1, 101)  # testdata 100indexes
         day_pred = np.arange(101, 104)  # 101-131-predicted
+    
+    # FOR RELIANCE
     else:
         day_new = np.arange(1, 101)  # testdata 100indexes
         day_pred = np.arange(101, 111)  # 101-131-predicted
 
-    numpyData3 = scaler.inverse_transform(df1[1131:])
+    if  request.args.get('stockname') =='AAPL':
+        numpyData3 = scaler.inverse_transform(df1[1158:])
+    
+    # FOR TSLA
+    elif (request.args.get('stockname') =='TSLA'):
+        numpyData3 = scaler.inverse_transform(df1[1158:])
+    
+    # FOR RELIANCE
+    else:
+        numpyData3 = scaler.inverse_transform(df1[1131:])
+
     numpyData4 = scaler.inverse_transform(lst_output)
     daynew = {"x": day_new.tolist(), "y": day_pred.tolist()}
     daypred = {"x": numpyData3.tolist(), "y": numpyData4.tolist()}
@@ -176,4 +186,4 @@ def index():
     return final_data
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(port=5001, debug=False)
