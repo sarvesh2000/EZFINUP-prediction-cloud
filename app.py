@@ -88,10 +88,10 @@ def index():
     testPredictPlot[:, :] = np.nan
     testPredictPlot[len(train_predict) + (look_back * 2) + 1:len(df1) - 1, :] = test_predict
     
-    if request.args.get('stockname') =='AAPL':
+    if request.args.get('stockname') =='AAPL' or request.args.get('stockname') == 'TSLA':
          x_input = test_data[341:].reshape(1,-1)
-    elif request.args.get('stockname') == 'TSLA':
-        x_input = test_data[341:].reshape(1,-1)
+    # elif request.args.get('stockname') == 'TSLA':
+    #     x_input = test_data[341:].reshape(1,-1)
     else:
         x_input = test_data[331:].reshape(1, -1)
 
@@ -161,12 +161,12 @@ def index():
         day_new = np.arange(1, 101)  # testdata 100indexes
         day_pred = np.arange(101, 111)  # 101-131-predicted
 
-    if  request.args.get('stockname') =='AAPL':
+    if  (request.args.get('stockname') =='AAPL') or (request.args.get('stockname') =='TSLA'):
         numpyData3 = scaler.inverse_transform(df1[1158:])
     
     # FOR TSLA
-    elif (request.args.get('stockname') =='TSLA'):
-        numpyData3 = scaler.inverse_transform(df1[1158:])
+    # elif (request.args.get('stockname') =='TSLA'):
+    #     numpyData3 = scaler.inverse_transform(df1[1158:])
     
     # FOR RELIANCE
     else:
